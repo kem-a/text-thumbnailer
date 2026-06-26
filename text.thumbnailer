@@ -1,0 +1,4 @@
+[Thumbnailer Entry]
+TryExec=textthumb
+Exec=textthumb %i %o %s
+MimeType=text/plain;text/markdown;text/x-markdown;

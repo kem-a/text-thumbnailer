@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Usage: textthumb <input> <output.png> [size_px]
+set -Eeuo pipefail
+in="$1"; out="$2"; size="${3:-1024}"
+
+mime="$(file --mime-type -Lb -- "$in")"
+case "$mime" in
+  text/*|application/x-desktop|application/javascript|application/json|application/xml|application/x-shellscript) ;;
+  *) exit 1 ;;
+esac
+
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+
+# pango: parses Pango markup, so escape & < > first
+esc='s/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g'
+if [[ "$mime" == "application/x-desktop" ]]; then
+  name=$(grep -m1 '^Name='    -- "$in" | cut -d= -f2-)
+  comm=$(grep -m1 '^Comment=' -- "$in" | cut -d= -f2-)
+  exec=$(grep -m1 '^Exec='    -- "$in" | cut -d= -f2-)
+  printf '%s\n\n%s\n— %s\n' "${name:-Desktop Entry}" "${comm:-}" "${exec:-}" | sed -e "$esc" > "$tmp"
+else
+  # head before sed: sed never SIGPIPEs under pipefail on large files
+  head -n 40 -- "$in" | sed -e 's/\t/    /g' -e 's/\r$//' -e "$esc" > "$tmp"
+fi
+
+margin=$(( size / 32 )); (( margin < 2 )) && margin=2
+ptsize=$(( size / 28 )); (( ptsize < 6 )) && ptsize=6
+inner=$(( size - 2 * margin ))
+
+# pango: (HarfBuzz) is ~30x faster than caption: on non-ASCII text (6s -> 0.2s).
+# plain PNG, not PNG8 (PNG8 quantizes the text image to 1 colour = blank).
+magick -background white -fill black -size "${inner}x" -pointsize "$ptsize" \
+  pango:@"$tmp" \
+  -gravity northwest -crop "${inner}x${inner}+0+0" +repage \
+  -background white -extent "${inner}x${inner}" \
+  -bordercolor white -border "$margin" \
+  -background white -alpha remove -alpha off \
+  "$out"

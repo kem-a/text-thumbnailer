@@ -1,4 +1,4 @@
-# Text Thumbnailer
+# Text Thumbnailer (.md, .txt)
 
 Readable preview thumbnails for plain-text and Markdown files in GNOME Files
 (Nautilus) and any other [freedesktop thumbnail](https://specifications.freedesktop.org/thumbnail-spec/latest/)
@@ -116,7 +116,3 @@ A few deliberate choices, learned the hard way:
 - **No thumbnails at all** — clear `~/.cache/thumbnails` (including `fail/`) and
   restart Nautilus; GNOME never retries a file marked failed until it changes.
 - **Test directly** — `textthumb file.md /tmp/t.png 512 && xdg-open /tmp/t.png`.
-
-## License
-
-MIT — see [`LICENSE`](LICENSE).

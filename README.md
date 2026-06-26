@@ -29,6 +29,17 @@ of the file into a clean preview — fast, and Unicode-correct.
 ## Installation
 
 ```bash
+./install.sh
+```
+
+The script copies the files (asking for `sudo` when needed), refreshes the
+thumbnail cache, and restarts Files. Run it as your normal user — not with
+`sudo` — so the cache is cleared for the right account.
+
+<details>
+<summary>Or install manually</summary>
+
+```bash
 sudo install -Dm755 textthumb         /usr/local/bin/textthumb
 sudo install -Dm644 text.thumbnailer  /usr/share/thumbnailers/text.thumbnailer
 
@@ -36,6 +47,8 @@ sudo install -Dm644 text.thumbnailer  /usr/share/thumbnailers/text.thumbnailer
 rm -rf ~/.cache/thumbnails/{normal,large,x-large,xx-large,fail}
 nautilus -q     # or log out and back in
 ```
+
+</details>
 
 > **Why `/usr/local/bin`?** GNOME runs thumbnailers inside a `bwrap` sandbox
 > that binds `/usr` but **not** `~/.local/bin`. The script must live under
@@ -45,9 +58,7 @@ nautilus -q     # or log out and back in
 ### Uninstall
 
 ```bash
-sudo rm -f /usr/local/bin/textthumb /usr/share/thumbnailers/text.thumbnailer
-rm -rf ~/.cache/thumbnails/{normal,large,x-large,xx-large,fail}
-nautilus -q
+./install.sh uninstall
 ```
 
 ## Usage
@@ -70,7 +81,7 @@ textthumb notes.md preview.png 512
 
 The thumbnailer registers these MIME types in `text.thumbnailer`:
 
-```
+```txt
 text/plain;text/markdown;text/x-markdown;
 ```
 
